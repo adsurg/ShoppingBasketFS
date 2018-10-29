@@ -3,7 +3,7 @@ module Tests
 open Xunit
 open System
 
-type Product = {name: string; price: decimal}
+type Product = {name: string; price: decimal; quantity: int}
 
 let emptyBasket : Product list = []
 
@@ -15,14 +15,23 @@ let twoDecimalPlaces(number:decimal) =
 
 let subTotal (basket : Product list) =
     basket 
-        |> List.sumBy (fun product -> product.price)
+        |> List.sumBy (fun product -> product.price * (decimal)product.quantity)
         |> twoDecimalPlaces
 
 [<Fact>]
 let ``When a product is added to an empty basket the total matches the price of the product`` () =
     let basket = emptyBasket
-                    |> add {name="Dove Soap"; price=39.99m}
+                    |> add {name="Dove Soap"; price=39.99m; quantity=1}
     let total = subTotal basket        
     
     Assert.Equal(39.99m, total)
 
+[<Fact>]
+let ``When a five products are added to an empty basket the total is correct`` () =
+    let basket = emptyBasket
+                    |> add {name="Dove Soap"; price=39.99m; quantity=5}
+    let total = subTotal basket        
+    
+    Assert.Equal(199.95m, total)
+
+    
