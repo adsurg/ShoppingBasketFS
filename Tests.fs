@@ -32,6 +32,10 @@ let calculateTax taxRate (basket : Product list) =
     (basket |> subTotal) * taxRate / 100m
         |> twoDecimalPlaces
 
+let total taxRate (basket : Product list) =
+    (basket |> calculateTax taxRate)
+    + (basket |> subTotal)
+
 [<Fact>]
 let ``When a product is added to an empty basket the total matches the price of the product`` () =
     let basket = emptyBasket
@@ -67,11 +71,21 @@ let ``When a product is added twice to an empty basket the basket contains one e
     Assert.Equal({name="Dove Soap"; price=39.99m; quantity=8}, basket.Head)
 
 [<Fact>]
-let ``When two products are added tax is calculated correctly`` () =
+let ``When two products are added, tax is calculated correctly`` () =
     let basket = emptyBasket
                     |> add {name="Dove Soap"; price=39.99m; quantity=2}
                     |> add {name="Axe Deo"; price=99.99m; quantity=2}
     
     let tax = basket |> calculateTax 12.5m       
     
-    Assert.Equal(35.01m, tax)
+    Assert.Equal(35.00m, tax)
+
+[<Fact>]
+let ``When two products are added, gross total is calculated correctly`` () =
+    let basket = emptyBasket
+                    |> add {name="Dove Soap"; price=39.99m; quantity=2}
+                    |> add {name="Axe Deo"; price=99.99m; quantity=2}
+    
+    let totalPrice = basket |> total 12.5m        
+    
+    Assert.Equal(314.96m, totalPrice)
